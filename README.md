@@ -29,6 +29,7 @@ The system:  
 
 **SQL Query Executor Sub-Workflow**
 ![SQL Query Executor](/screenshots/sql-query-executor.PNG)
+
 *This sub-workflow is called by the AI Agent to execute the generated SQL query against the Postgres database.*
 
 ---
