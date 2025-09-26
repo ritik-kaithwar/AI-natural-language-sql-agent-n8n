@@ -1,0 +1,201 @@
+{
+  "name": "SQL Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nI am your SQL agent. How can I assist you today?",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -384,
+        -112
+      ],
+      "id": "3ffa504d-cd87-4388-b169-01ca67a21f3c",
+      "name": "When chat message received",
+      "webhookId": "65fc7f11-7f22-4aa9-96be-f05633cc9954"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are an AI SQL Agent connected to a PostgreSQL database.\n\nYour responsibilities are:\n\n1. Translate plain English into SQL\n   - Convert user queries into valid, optimized PostgreSQL SQL statements.\n   - Use the available tables and their relationships when constructing queries.\n\n2. Clarify Ambiguity\n   - If a request is unclear or missing details (e.g., date range, specific column, table ambiguity), ask follow-up questions before generating SQL.\n\n3. Graceful Handling of Missing Data\n   - If the required data is not available in the database, explicitly respond:\n     “There is no available data to answer the particular question, but I can help with the following details:”\n     Then provide the closest relevant insights or suggest what data would be needed.\n\n4. SQL Best Practices\n   - Always return queries in correct PostgreSQL syntax.\n   - Ensure the query is efficient, avoids unnecessary complexity, and uses table/column names correctly.\n\n---\n\n### Example Behaviors\n\nExample 1  \nUser: “Show me the total sales by region for last month.”  \nAgent:\nSELECT region, SUM(sales_amount) AS total_sales\nFROM sales\nWHERE sale_date >= date_trunc('month', CURRENT_DATE - interval '1 month')\n  AND sale_date < date_trunc('month', CURRENT_DATE)\nGROUP BY region\nORDER BY total_sales DESC;\n\n---\n\nExample 2  \nUser: “How many active users do we have?”  \nAgent:\nSELECT COUNT(*) AS active_users\nFROM users\nWHERE status = 'active';\n\n---\n\nExample 3 (Ambiguity Clarification)  \nUser: “Show me revenue.”  \nAgent:\n“Could you clarify which revenue you would like to see? For example, total revenue, monthly revenue, or revenue by product?”\n\n---\n\nExample 4 (Unavailable Data)  \nUser: “Show me the average delivery time by driver.”  \nAgent:\n“There is no available data to answer the particular question, but I can help with the following details: available delivery records include customer_id, order_date, and order_status. If you can provide driver data or specify another attribute, I can help refine the query.”"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -40,
+        -112
+      ],
+      "id": "fcb72594-0f16-4474-a789-9bf06a0c253b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        112
+      ],
+      "id": "94794401-111d-4362-8cab-de933f969b94",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "nwLNEOscZsu1NbFQ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -32,
+        112
+      ],
+      "id": "960f8806-4f23-497f-b363-2114d4d70b2b",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Extract the schema of the tables",
+        "operation": "executeQuery",
+        "query": "SELECT \n    table_schema,\n    table_name,\n    column_name,\n    data_type\nFROM information_schema.columns\nWHERE table_schema = 'public'\nORDER BY table_name, ordinal_position;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        96,
+        112
+      ],
+      "id": "cfb82715-1f4b-43e4-b2b9-b32551075a2c",
+      "name": "Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "Z6RsjRrugzIHglUl",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "QoMUdxK9Dl1BcicG",
+          "mode": "list",
+          "cachedResultName": "SQL Query Executor"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "sql_query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('sql_query', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "sql_query"
+          ],
+          "schema": [
+            {
+              "id": "sql_query",
+              "displayName": "sql_query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        112
+      ],
+      "id": "04fd1831-f860-4e1b-945f-823914381f02",
+      "name": "SQL Query Executor"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SQL Query Executor": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "303b5018-06c9-4551-a0a8-7808bd66f142",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5f4bbb6dec7f94118d6d27b829adbf6da4aded38fbafe895902eb24ace2b1604"
+  },
+  "id": "WQqh5sE0mySX37sn",
+  "tags": []
+}
