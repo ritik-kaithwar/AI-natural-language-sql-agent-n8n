@@ -24,7 +24,9 @@ The system:  
 ### Workflow Diagrams  
 
 **Main AI Agent Workflow**
+
 ![Main AI Agent Workflow](/screenshots/sql-agent.PNG)
+
 *This shows the primary flow, connecting the chat trigger, the AI Agent, the Gemini LLM (the brain), memory, and the two required database tools.*
 
 **SQL Query Executor Sub-Workflow** 
