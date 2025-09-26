@@ -27,9 +27,9 @@ The system:  
 ![Main AI Agent Workflow](/screenshots/sql-agent.PNG)
 *This shows the primary flow, connecting the chat trigger, the AI Agent, the Gemini LLM (the brain), memory, and the two required database tools.*
 
-**SQL Query Executor Sub-Workflow**
-![SQL Query Executor](/screenshots/sql-query-executor.PNG)
+**SQL Query Executor Sub-Workflow** 
 
+![SQL Query Executor](/screenshots/sql-query-executor.PNG)
 *This sub-workflow is called by the AI Agent to execute the generated SQL query against the Postgres database.*
 
 ---
